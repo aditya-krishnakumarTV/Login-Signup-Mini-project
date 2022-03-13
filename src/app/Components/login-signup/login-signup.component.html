@@ -1,0 +1,46 @@
+<div class="container">
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <div class="form-group">
+      <input
+        class="form-control"
+        type="text"
+        placeholder="Enter Email"
+        name="email"
+        #email="ngModel"
+        ngModel
+        email
+        required
+      />
+      <span class="help-block" *ngIf="email.touched && email.invalid">
+        Please enter proper Email!
+      </span>
+    </div>
+    <br />
+    <div class="form-group">
+      <input
+        class="form-control"
+        type="password"
+        placeholder="Enter Password"
+        name="password"
+        #password="ngModel"
+        ngModel
+        required
+      />
+      <span class="help-block" *ngIf="password.touched && password.invalid">
+        Please enter proper Password!
+      </span>
+    </div>
+    <br />
+    <div class="text-center">
+      <button class="btn btn-primary" type="submit" [disabled]="f.invalid">
+        {{ isLogIn ? "Log In" : "Sign Up" }}
+      </button>
+    </div>
+    <br />
+    <div class="text-center">
+      <button class="btn btn-default" type="button" (click)="onSwitchMode()">
+        {{ isLogIn ? "New here? Sign up" : "Already Signed in? Login" }}
+      </button>
+    </div>
+  </form>
+</div>
