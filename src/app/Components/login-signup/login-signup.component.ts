@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { LoginSignupService } from 'src/app/services/login-signup.service';
 
 @Component({
   selector: 'app-login-signup',
@@ -10,7 +11,7 @@ export class LoginSignupComponent implements OnInit {
 
   isLogIn: boolean = true;
 
-  constructor() { }
+  constructor(private loginSignupService: LoginSignupService) { }
 
   ngOnInit(): void {
   }
@@ -20,7 +21,21 @@ export class LoginSignupComponent implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    console.log(form);
+    if (form.invalid) {
+      return;
+    }
+    const email = form.value.email;
+    const password = form.value.password;
+
+    if(!this.isLogIn){
+      this.loginSignupService.signUp(email, password).subscribe((res) => {
+        console.log(res);
+      },
+        (error) => {
+          console.log(error);
+      });
+    }
+    
     form.reset();
   }
 
