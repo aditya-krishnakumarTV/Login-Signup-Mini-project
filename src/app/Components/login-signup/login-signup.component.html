@@ -1,5 +1,8 @@
 <div class="container">
-  <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+  <div *ngIf="isLoading" style="text-align: center;">
+    <app-loading-spinner></app-loading-spinner>
+  </div>
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)" *ngIf="!isLoading">
     <div class="form-group">
       <input
         class="form-control"

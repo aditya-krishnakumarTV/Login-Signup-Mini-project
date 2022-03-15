@@ -10,6 +10,7 @@ import { LoginSignupService } from 'src/app/services/login-signup.service';
 export class LoginSignupComponent implements OnInit {
 
   isLogIn: boolean = true;
+  isLoading: boolean = false;
 
   constructor(private loginSignupService: LoginSignupService) { }
 
@@ -26,16 +27,19 @@ export class LoginSignupComponent implements OnInit {
     }
     const email = form.value.email;
     const password = form.value.password;
+    this.isLoading = true;
 
-    if(!this.isLogIn){
+    if (!this.isLogIn) {
       this.loginSignupService.signUp(email, password).subscribe((res) => {
         console.log(res);
+        this.isLoading = false;
       },
         (error) => {
           console.log(error);
-      });
+          this.isLoading = false;
+        });
     }
-    
+
     form.reset();
   }
 
