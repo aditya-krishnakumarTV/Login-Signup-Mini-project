@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { catchError } from "rxjs/operators";
 
 interface LoginSignupDataResponse {
     idToken: string;
@@ -23,6 +24,24 @@ export class LoginSignupService {
                 email: email,
                 password: password,
                 returnSecureToken: true
-            })
+            }
+        ).pipe(catchError(errorRes => {
+            let errorMessage = "An unknown error occured!"
+            if(!errorRes.error || !errorRes.error.error){
+                throw errorMessage
+            }
+            switch(errorRes.error.error.message){
+                case 'EMAIL_EXISTS' :
+                  errorMessage = "The email address is already in use by another account.";
+                  break;
+                case 'INVALID_EMAIL':
+                  errorMessage = "The entered email is invalid.";
+                  break;
+                case 'WEAK_PASSWORD : Password should be at least 6 characters':
+                  errorMessage = "The Password should be at least 6 characters.";
+                  break;
+              }
+            throw errorMessage
+        }))
     }
 }

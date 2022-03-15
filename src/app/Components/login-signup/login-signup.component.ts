@@ -14,7 +14,6 @@ export class LoginSignupComponent implements OnInit {
 
   isLogIn: boolean = true;
   isLoading: boolean = false;
-  errorMes : string = '';
 
   constructor(private loginSignupService: LoginSignupService) { }
 
@@ -34,30 +33,27 @@ export class LoginSignupComponent implements OnInit {
     this.isLoading = true;
 
     if (!this.isLogIn) {
-      this.loginSignupService.signUp(email, password).subscribe((res) => {
-        console.log(res);
-        this.isLoading = false;
-      },
-        (errorRes) => {
-          console.log(errorRes);
-          switch(errorRes.error.error.message){
-            case 'EMAIL_EXISTS' :
-              this.errorMes = "The email address is already in use by another account.";
-              break;
-            case 'INVALID_EMAIL':
-              this.errorMes = "The entered email is invalid.";
-              break;
-            case 'WEAK_PASSWORD : Password should be at least 6 characters':
-              this.errorMes = "The Password should be at least 6 characters.";
-              break;
-          }
+      this.loginSignupService.signUp(email, password).subscribe(
+        (res) => {
+          console.log(res);
+          this.isLoading = false;
+        },
+        (errorMessage) => {
           Swal.fire({
             icon: 'error',
             title: 'Something went wrong!',
-            text: this.errorMes,
+            text: errorMessage,
           });
           this.isLoading = false;
-        });
+        },
+        () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Successfully Signed up!',
+          });
+          this.isLoading = false;
+        }
+      );
     }
 
     form.reset();
