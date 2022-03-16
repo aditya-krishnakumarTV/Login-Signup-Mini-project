@@ -54,6 +54,28 @@ export class LoginSignupComponent implements OnInit {
           this.isLoading = false;
         }
       );
+    } else {
+      this.loginSignupService.logIn(email, password).subscribe(
+        (res) => {
+          console.log(res);
+          this.isLoading = false;
+        },
+        (errorMessage) => {
+          Swal.fire({
+            icon: "error",
+            title: "Opps...",
+            text: errorMessage
+          })
+          this.isLoading = false;
+        },
+        () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Successfully Logged in!',
+          });
+          this.isLoading = false;
+        }
+      )
     }
 
     form.reset();
