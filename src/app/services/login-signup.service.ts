@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { catchError } from "rxjs/operators";
+import { throwError } from "rxjs";
 
 interface LoginSignupDataResponse {
     idToken: string;
@@ -28,24 +29,7 @@ export class LoginSignupService {
                 password: password,
                 returnSecureToken: true
             }
-        ).pipe(catchError(errorRes => {
-            let errorMessage = "An unknown error occured!"
-            if (!errorRes.error || !errorRes.error.error) {
-                throw errorMessage
-            }
-            switch (errorRes.error.error.message) {
-                case 'EMAIL_EXISTS':
-                    errorMessage = "The email address is already in use by another account.";
-                    break;
-                case 'INVALID_EMAIL':
-                    errorMessage = "The entered email is invalid.";
-                    break;
-                case 'WEAK_PASSWORD : Password should be at least 6 characters':
-                    errorMessage = "The Password should be at least 6 characters.";
-                    break;
-            }
-            throw errorMessage
-        }))
+        ).pipe(catchError(this.handleError))
     }
 
     logIn(email: string, password: string) {
@@ -56,10 +40,13 @@ export class LoginSignupService {
                 password: password,
                 returnSecureToken: true
             }
-        ).pipe(catchError(errorRes => {
-            let errorMessage = "An unknown error occured!"
+        ).pipe(catchError(this.handleError))
+    }
+
+    private handleError(errorRes : HttpErrorResponse){
+        let errorMessage = "An unknown error occured!"
             if (!errorRes.error || !errorRes.error.error) {
-                throw errorMessage
+                return throwError(errorMessage)
             }
             switch (errorRes.error.error.message) {
                 case 'EMAIL_NOT_FOUND':
@@ -68,8 +55,16 @@ export class LoginSignupService {
                 case 'INVALID_PASSWORD':
                     errorMessage = "The password is invalid or the user does not have a password.";
                     break;
+                    case 'EMAIL_EXISTS':
+                    errorMessage = "The email address is already in use by another account.";
+                    break;
+                case 'INVALID_EMAIL':
+                    errorMessage = "The entered email is invalid.";
+                    break;
+                case 'WEAK_PASSWORD : Password should be at least 6 characters':
+                    errorMessage = "The Password should be at least 6 characters.";
+                    break;
             }
-            throw errorMessage
-        }))
+            return throwError(errorMessage)
     }
 }
