@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { catchError } from "rxjs/operators";
-import { throwError } from "rxjs";
+import { Subject, catchError, throwError, tap } from "rxjs";
+
+import { Login } from "../shared/login.model";
 
 interface LoginSignupDataResponse {
     idToken: string;
@@ -17,7 +18,8 @@ interface LoginSignupDataResponse {
 })
 export class LoginSignupService {
 
-    apiKey = "AIzaSyA3JE6GA1oB7GK1rs-OIdSL2zK3Kx284ac"
+    apiKey = "AIzaSyA3JE6GA1oB7GK1rs-OIdSL2zK3Kx284ac";
+    user = new Subject<Login>();
 
     constructor(private http: HttpClient) { }
 
@@ -29,7 +31,11 @@ export class LoginSignupService {
                 password: password,
                 returnSecureToken: true
             }
-        ).pipe(catchError(this.handleError))
+        ).pipe(catchError(this.handleError), tap(
+            (resData) => {
+                this.handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn)
+            })
+        )
     }
 
     logIn(email: string, password: string) {
@@ -40,31 +46,46 @@ export class LoginSignupService {
                 password: password,
                 returnSecureToken: true
             }
-        ).pipe(catchError(this.handleError))
+        ).pipe(catchError(this.handleError), tap(
+            (resData) => {
+                this.handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn)
+            })
+        )
     }
 
-    private handleError(errorRes : HttpErrorResponse){
+    private handleAuthentication(email: string, id: string, token: string, expiresIn: number) {
+        const expiryDate = new Date(new Date().getTime() + expiresIn * 1000);
+        const user = new Login(
+            email,
+            id,
+            token,
+            expiryDate
+        );
+        this.user.next(user);
+    }
+
+    private handleError(errorRes: HttpErrorResponse) {
         let errorMessage = "An unknown error occured!"
-            if (!errorRes.error || !errorRes.error.error) {
-                return throwError(errorMessage)
-            }
-            switch (errorRes.error.error.message) {
-                case 'EMAIL_NOT_FOUND':
-                    errorMessage = "There is no user record corresponding to this email. The user may have been deleted.";
-                    break;
-                case 'INVALID_PASSWORD':
-                    errorMessage = "The password is invalid or the user does not have a password.";
-                    break;
-                    case 'EMAIL_EXISTS':
-                    errorMessage = "The email address is already in use by another account.";
-                    break;
-                case 'INVALID_EMAIL':
-                    errorMessage = "The entered email is invalid.";
-                    break;
-                case 'WEAK_PASSWORD : Password should be at least 6 characters':
-                    errorMessage = "The Password should be at least 6 characters.";
-                    break;
-            }
+        if (!errorRes.error || !errorRes.error.error) {
             return throwError(errorMessage)
+        }
+        switch (errorRes.error.error.message) {
+            case 'EMAIL_NOT_FOUND':
+                errorMessage = "There is no user record corresponding to this email. The user may have been deleted.";
+                break;
+            case 'INVALID_PASSWORD':
+                errorMessage = "The password is invalid or the user does not have a password.";
+                break;
+            case 'EMAIL_EXISTS':
+                errorMessage = "The email address is already in use by another account.";
+                break;
+            case 'INVALID_EMAIL':
+                errorMessage = "The entered email is invalid.";
+                break;
+            case 'WEAK_PASSWORD : Password should be at least 6 characters':
+                errorMessage = "The Password should be at least 6 characters.";
+                break;
+        }
+        return throwError(errorMessage)
     }
 }
