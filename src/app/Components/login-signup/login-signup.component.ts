@@ -1,5 +1,6 @@
 import { NgForm } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { LoginSignupService } from 'src/app/services/login-signup.service';
 
@@ -15,7 +16,7 @@ export class LoginSignupComponent implements OnInit {
   isLogIn: boolean = true;
   isLoading: boolean = false;
 
-  constructor(private loginSignupService: LoginSignupService) { }
+  constructor(private loginSignupService: LoginSignupService, private router : Router) { }
 
   ngOnInit(): void {
   }
@@ -52,9 +53,10 @@ export class LoginSignupComponent implements OnInit {
             title: 'Successfully Signed up!',
           });
           this.isLoading = false;
+          this.router.navigate(['/home'])
         }
-      );
-    } else {
+        );
+      } else {
       this.loginSignupService.logIn(email, password).subscribe(
         (res) => {
           console.log(res);
@@ -74,6 +76,7 @@ export class LoginSignupComponent implements OnInit {
             title: 'Successfully Logged in!',
           });
           this.isLoading = false;
+          this.router.navigate(['/home'])
         }
       )
     }
